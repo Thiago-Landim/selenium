@@ -1,7 +1,9 @@
 package com.selenium;
 
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -12,61 +14,57 @@ import org.openqa.selenium.support.ui.Select;
 import java.util.List;
 
 public class TestarPaginaSelenium {
-    static WebDriver driver = new ChromeDriver();
-    static  String  site = "file:///C:/Users/ThiagoPaesLandimLima/Desktop/componentes.html";
-    public static void main(String[] args) {
+    static String site = "file:///C:/Users/ThiagoPaesLandimLima/Desktop/componentes.html";
+    private WebDriver driver;
+    private DSL dsl;
 
+    @Before
+    public void inicializa() {
+        driver = new ChromeDriver();
+        driver.get(site);
+        driver.manage().window().maximize();
+        dsl = new DSL(driver);
+    }
+
+    public void finaliza() {
+        driver.quit();
     }
 
     @Test
-    public  void enviarInfoParaCampos(){
+    public void enviarInfoParaCampos() {
 
-        driver.get(site);
-        driver.findElement(By.id("elementosForm:nome")).sendKeys("teste");
-        driver.findElement(By.id("elementosForm:sobrenome")).sendKeys("teste2");
+        dsl.escreve("elementosForm:nome", "nome qualquer");
+        dsl.escreve("elementosForm:sobrenome", "SobrenomeQualquer");
 
-        Assert.assertEquals("teste", driver.findElement(By.id(
-                "elementosForm:nome"
-        )).getAttribute("value"));
-
-        Assert.assertEquals("teste2", driver.findElement(By.id(
-                "elementosForm:sobrenome"
-        )).getAttribute("value"));
+        Assert.assertEquals("nome qualquer", dsl.obterValorCampo("elementosForm:nome"));
+        Assert.assertEquals("SobrenomeQualquer", dsl.obterValorCampo("elementosForm:sobrenome"));
     }
 
     @Test
-    public void deveInteragirComRadioButtom(){
-        driver.get(site);
-        driver.findElement(By.id("elementosForm:sexo:0")).click();
-        Assert.assertTrue(driver.findElement(By.id("elementosForm:sexo:0")).isSelected());
+    public void deveInteragirComRadioButtom() {
+
+        dsl.clicarCampos("elementosForm:sexo:0");
+        Assert.assertTrue(dsl.radioIsMarcado("elementosForm:sexo:0"));
     }
 
     @Test
-    public void deveInteragirComComboBox(){
-        driver.get(site);
-        WebElement element = driver.findElement(By.id("elementosForm:escolaridade"));
-        Select combo = new Select(element);
+    public void deveInteragirComComboBox() {
 
-
-        combo.selectByIndex(6);
-       // combo.selectByValue("mestrado");
-       // combo.getFirstSelectedOption();
-
-        Assert.assertEquals("Mestrado",combo.getFirstSelectedOption().getText());
-
+        dsl.selecionarCombo("elementosForm:escolaridade", "mestrado");
+        Assert.assertEquals("mestrado", dsl.obterValorCampo("elementosForm:escolaridade"));
     }
 
     @Test
-    public void deveVerificarValoresCombo(){
-        driver.get(site);
+    public void deveVerificarValoresCombo() {
+
         WebElement element = driver.findElement(By.id("elementosForm:escolaridade"));
         Select combo = new Select(element);
         List<WebElement> options = combo.getOptions();
         Assert.assertEquals(8, options.size());
 
         boolean encontrou = false;
-        for(WebElement option: options) {
-            if(option.getText().equals("Mestrado")){
+        for (WebElement option : options) {
+            if (option.getText().equals("Mestrado")) {
                 encontrou = true;
                 break;
             }
@@ -74,8 +72,25 @@ public class TestarPaginaSelenium {
         Assert.assertTrue(encontrou);
     }
 
+    @Test
+    public void deveVerificarSelecionarCombo() {
+
+        WebElement element = driver.findElement(By.id("elementosForm:esportes"));
+        Select combo = new Select(element);
+        combo.selectByVisibleText("Corrida");
+
+        List<WebElement> allselectOption = combo.getAllSelectedOptions();
+        Assert.assertEquals(1, allselectOption.size());
 
 
     }
+
+    @Test
+    public void clickButton() {
+
+        driver.findElement(By.id("buttonSimple")).click();
+
+    }
+}
 
 
