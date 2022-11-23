@@ -18,7 +18,7 @@ public class TesteFramesEJanelas {
 
 	@Before
 	public void inicializa(){
-		driver = new ChromeDriver());
+		driver = new ChromeDriver();
 		driver.manage().window().setSize(new Dimension(1200, 765));
 		driver.get("file:///" + System.getProperty("user.dir") + "/src/main/resources/componentes.html");
 		dsl = new DSL(driver);
